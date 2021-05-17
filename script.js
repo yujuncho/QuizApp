@@ -14,7 +14,7 @@
  */
 
 class QuizApp {
-  constructor(quizItems) {
+  constructor(quizItems, duration = 60) {
     this.display = { title: "", body: "", footer: "" };
     this.highScoresView = new HighScoresView(
       quizItems.reduce((a, b) => a + b, 0),
@@ -32,8 +32,12 @@ class QuizApp {
     // object.
     this.quizView = new QuizView(
       quizItems,
+      duration,
       this.display,
       this.render,
+      () => {
+        this.highScoresView.viewScores();
+      },
       score => {
         this.highScoresView.viewSubmitScore(score);
       }
@@ -52,25 +56,54 @@ class QuizApp {
     }
   }
 
-  start(quizDuration = 60) {
-    this.quizView.viewInstructions(quizDuration);
+  start() {
+    this.quizView.viewInstructions();
   }
 }
 
 /* QUIZ */
 class QuizView {
-  constructor(quizItems, display, render, completedCallback) {
+  constructor(
+    quizItems,
+    duration,
+    display,
+    render,
+    viewScores,
+    completedCallback
+  ) {
     // [{ question: "", choices: [], correctChoice: Index, value: Integer }]
     this.quizItems = quizItems;
+    this.quizDuration = duration;
     this.display = display;
     this.render = render;
-    this.completedCallback = completedCallback;
+    this.viewScores = viewScores;
+    this.completedCallback = score => {
+      document.getElementById("timer").remove();
+      clearInterval(this.timer);
+      completedCallback(score);
+    };
 
     this.nextQuestion = 0;
     this.quizScore = 0;
+    this.timer;
   }
 
-  viewInstructions(quizDuration) {
+  viewInstructions() {
+    // Set Header
+    let header = document.getElementById("header");
+    let viewHighScoresLink = document.createElement("a");
+    viewHighScoresLink.href = "";
+    viewHighScoresLink.textContent = "View High Scores";
+    viewHighScoresLink.addEventListener("click", event => {
+      event.preventDefault();
+      this.viewScores();
+    });
+    header.appendChild(viewHighScoresLink);
+
+    let timerElement = document.createElement("p");
+    timerElement.id = "timer";
+    header.appendChild(timerElement);
+
     // Set View
     this.display.title = "Coding Quiz Challenge";
     this.display.body = `
@@ -89,19 +122,21 @@ class QuizView {
       event.preventDefault();
 
       // Set the timer
-      let duration = quizDuration;
-      let timer = setInterval(() => {
-        // TODO: show timer
-        console.log(duration);
+      let duration = this.quizDuration;
+      timerElement.textContent = duration;
+      duration--;
+
+      this.timer = setInterval(() => {
         if (duration > 0) {
+          timerElement.textContent = duration;
           duration--;
         } else {
-          clearInterval(timer);
           this.completedCallback(this.quizScore);
         }
       }, 1000);
 
       // Set quiz state and show the first question
+      viewHighScoresLink.remove();
       this.nextQuestion = 0;
       this.quizScore = 0;
       this.viewQuestion(this.nextQuestion);
@@ -191,6 +226,10 @@ class HighScoresView {
   }
 
   viewScores() {
+    // Set Header
+    let header = document.getElementById("header");
+    header.innerHTML = "";
+
     // View Helper
     let createScoreList = () => {
       let scoreList = [];
@@ -212,7 +251,7 @@ class HighScoresView {
             </ul>
     `;
     this.display.footer = `
-            <button type="button" id="back" class="btn btn-secondary">Go Back</button>
+            <button type="button" id="back" class="btn btn-secondary">View Instructions</button>
             <button type="button" id="delete" class="btn btn-danger">Delete High Scores</button>
     `;
     this.render();
@@ -294,18 +333,23 @@ let quizItems = [
     value: 20
   },
   {
-    question: "universe",
-    choices: [1, 300, 42, 63],
-    correctChoice: 2,
-    value: 20
-  },
-  {
     question: "Answer",
     choices: [1, 300, 42, 63],
     correctChoice: 2,
     value: 20
   },
-  { question: "to", choices: [1, 300, 42, 63], correctChoice: 2, value: 20 }
+  {
+    question: "to",
+    choices: [1, 300, 42, 63],
+    correctChoice: 2,
+    value: 20
+  },
+  {
+    question: "universe",
+    choices: [1, 300, 42, 63],
+    correctChoice: 2,
+    value: 20
+  }
 ];
 let quiz = new QuizApp(quizItems);
 quiz.start();
