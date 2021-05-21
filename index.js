@@ -3,7 +3,7 @@
 import QuizApp from "./QuizApp.js";
 
 let loadQuizItemsJson = callback => {
-  fetch("http://yujuncho7.github.io/QuizApp/public/quizItems.json")
+  fetch("./public/quizItems.json")
     .then(response => response.json())
     .then(data => {
       callback(data);
