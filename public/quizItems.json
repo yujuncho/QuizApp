@@ -1,0 +1,26 @@
+[
+  {
+    "question": "Answer to universe",
+    "choices": [1, 300, 42, 63],
+    "correctChoice": 2,
+    "value": 20
+  },
+  {
+    "question": "Answer",
+    "choices": [1, 300, 42, 63],
+    "correctChoice": 2,
+    "value": 20
+  },
+  {
+    "question": "to",
+    "choices": [1, 300, 42, 63],
+    "correctChoice": 2,
+    "value": 20
+  },
+  {
+    "question": "universe",
+    "choices": [1, 300, 42, 63],
+    "correctChoice": 2,
+    "value": 20
+  }
+]
